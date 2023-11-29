@@ -1,0 +1,52 @@
+---
+title: "Class 12: Intro to Genome Informatics"
+author: "Clarissa Savko (PID: A69028482)"
+format: pdf
+---
+
+Q1: What are those 4 candidate SNPs?
+rs12936231, rs8067378, rs9303277, and rs7216389
+
+Q2: What three genes do these variants overlap or effect?
+zona pellucida binding protein 2, IKAROS family zinc finger 3, gasdermin B 
+
+Q3: What is the location of rs8067378 and what are the different alleles for rs8067378?
+Chromosome 17: 39,894,595-39,895,595
+
+Q4: Name at least 3 downstream genes for rs8067378?
+GSDMB, ORMDL3, PSMD3
+
+Q5: What proportion of the Mexican Ancestry in Los Angeles sample population (MXL) are homozygous for the asthma associated SNP (G|G)?
+
+```{r}
+MXL <- read.csv("373531-SampleGenotypes-Homo_sapiens_Variation_Sample_rs8067378.csv")
+table(MXL)
+sum(MXL$Genotype..forward.strand.=="G|G") / nrow(MXL)
+```
+14.06%
+
+Q6. Back on the ENSEMBLE page, use the “search for a sample” field above to find the particular sample HG00109. This is a male from the GBR population group. What is the genotype for this sample?
+
+G|G. Homozygous for the SNP
+
+Q7: How many sequences are there in the first file? What is
+the file size and format of the data? Make sure the format is
+fastqsanger here!
+
+3,863 sequences. The file size is 741.9 KB. The format is fastqsanger.
+
+Q8: What is the GC content and sequence length of the second fastq file?
+54%
+
+Q9: How about per base sequence quality? Does any base have a mean quality score below 20?
+No, all of the bases have a mean quality score above 20.
+
+Q10: Where are most the accepted hits located?
+They are located on chromosome 17 mostly centralized around 3 specific genes in that region.
+
+Q11: Following Q10, is there any interesting gene around that area?
+Yes, the genes associated with childhood asthma such as IKZF3, GSDMB, and ORMDL3.
+
+Q12: Cufflinks again produces multiple output files that you can inspect from your right-handside galaxy history. From the “gene expression” output, what is the FPKM for the ORMDL3 gene? What are the other genes with above zero FPKM values?
+THE FPKM for ORMDL3 is 136853. GSDMA, GSDMB, ZPBP2, and PSMD3 have FPKM values above 0.
+	

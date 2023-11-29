@@ -1,0 +1,212 @@
+---
+title: "Class 7: Machine Learning"
+author: "Clarissa Savko (PID:A69028482)"
+format: pdf
+---
+# Clustering
+
+We will start with k-means clustering, one of the most prevalent of all clustering methods.
+
+To get started let's make some data up:
+
+```{r}
+hist(rnorm(10000, mean=3))
+```
+
+```{r}
+tmp <- c(rnorm(30,3), rnorm(30, -3))
+x <- cbind(x=tmp, y=rev(tmp))
+x
+```
+```{r}
+plot(x)
+```
+The main function in R for k-means clustering is called 'kmeans()'.
+```{r}
+k <- kmeans(x, centers=2, nstart=20)
+k
+```
+Q1. How many points are in each cluster
+```{r}
+k$size
+```
+
+Q2.The clustering result i.e.membership vector?
+```{r}
+k$cluster
+```
+
+Q3. Cluster centers
+```{r}
+k$centers
+```
+
+Q4. Make a plot of our data colored by clustering results with optionally the cluster centers shown.
+```{r}
+plot(x, col=k$cluster, pch=16)
+points(k$centers, col="blue", pch=15, cex=2)
+```
+
+Q5. Run kmeans again except with 3 groups rather than 2 and plot the results.
+```{r}
+k3 <- kmeans(x, centers=3, nstart=20)
+k3
+```
+```{r}
+plot(x, col=k3$cluster, pch=16)
+points(k3$centers, col="blue", pch=15, cex=2)
+```
+
+# Hierarchical Clustering has an advantage in that it can reveal the structure in your data rather than imposing a structure as k means will.
+
+The main function for this in "base" R is called `hclust()`
+
+It requires a distance matrix as input, not the raw data itself
+
+```{r}
+hc <- hclust( dist(x) )
+hc
+```
+```{r}
+plot(hc)
+abline(h=8, col= "red")
+```
+
+The function to get our clusters/groups from a hclust object is called `cutree()`
+```{r}
+groups <- cutree(hc, h=8)
+```
+Q. Plot our hclust results in terms of our data colored by cluster membership.
+```{r}
+plot(x, col= groups)
+```
+
+# Principal Component Analysis (PCA)
+
+We will work on data from the UK about the strange stuff folks there eat. It has 17 different foods for 4 countries.
+
+```{r}
+url <- "https://tinyurl.com/UK-foods"
+data <- read.csv(url)
+head(data)
+```
+This risks losing data if you run the code multiple times and lose columns.
+```{r}
+rownames(data) <- data[,1]
+data <- data[,-1]
+head(data)
+```
+
+```{r}
+data <- read.csv(url,row.names=1)
+head(data)
+```
+```{r}
+dim(data)
+```
+
+17 rows and 4 columns.
+
+```{r}
+barplot(as.matrix(data), beside=T, col=rainbow(nrow(data)))
+```
+
+
+```{r}
+pairs(data, col=rainbow(10), pch=16)
+```
+
+
+Most of the points for the graphs comparing to North Ireland are in the bottom left corner and then there are just two points in the top right corner. 
+
+# PCA to the rescue
+
+Help me make sense of this data. The main function for PCA in base R is called `prcomp`
+
+It wants the transpose (`t()`) of our food data for analysis.
+```{r}
+pca <- prcomp(t(data))
+summary(pca)
+```
+One of the main results that folks look for is called the "score plot" aka PC plot, PC1 vs PC2 plot
+
+```{r}
+plot(pca$x[,1], pca$x[,2],xlab="PC1", ylab="PC2", xlim=c(-270,500))
+text(pca$x[,1], pca$x[,2], colnames(data), col=rainbow(4))
+```
+```{r}
+v <- round( pca$sdev^2/sum(pca$sdev^2) * 100 )
+v
+z <- summary(pca)
+z$importance
+barplot(v, xlab="Principal Component", ylab="Percent Variation")
+```
+```{r}
+par(mar=c(10, 3, 0.35, 0))
+barplot( pca$rotation[,1], las=2 )
+```
+
+```{r}
+par(mar=c(10, 3, 0.35, 0))
+barplot( pca$rotation[,2], las=2 )
+```
+```{r}
+pca$rotation
+```
+
+```{r}
+library(ggplot2)
+df <- as.data.frame(pca$x)
+df_lab <- tibble::rownames_to_column(df, "Country")
+
+# Our first basic plot
+ggplot(df_lab) + 
+  aes(PC1, PC2, col=Country) + 
+  geom_point()
+
+```
+```{r}
+ggplot(df_lab) + 
+  aes(PC1, PC2, col=Country, label=Country) + 
+  geom_hline(yintercept = 0, col="gray") +
+  geom_vline(xintercept = 0, col="gray") +
+  geom_point(show.legend = FALSE) +
+  geom_label(hjust=1, nudge_x = -10, show.legend = FALSE) +
+  expand_limits(x = c(-300,500)) +
+  xlab("PC1 (67.4%)") +
+  ylab("PC2 (28%)") +
+  theme_bw()
+```
+
+```{r}
+ld <- as.data.frame(pca$rotation)
+ld_lab <- tibble::rownames_to_column(ld, "Food")
+
+ggplot(ld_lab) +
+  aes(PC1, Food) +
+  geom_col() 
+
+```
+```{r}
+ggplot(ld_lab) +
+  aes(PC1, reorder(Food, PC1), bg=PC1) +
+  geom_col() + 
+  xlab("PC1 Loadings/Contributions") +
+  ylab("Food Group") +
+  scale_fill_gradient2(low="purple", mid="gray", high="darkgreen", guide=NULL) +
+  theme_bw()
+```
+
+```{r}
+biplot(pca)
+```
+```{r}
+url2 <- "https://tinyurl.com/expression-CSV"
+rna.data <- read.csv(url2, row.names=1)
+head(rna.data)
+```
+```{r}
+dim(rna.data)
+```
+
+100 genes, 10 samples
