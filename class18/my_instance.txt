@@ -1,0 +1,3 @@
+#My AWS instance
+
+ec2-34-217-79-233.us-west-2.compute.amazonaws.com
